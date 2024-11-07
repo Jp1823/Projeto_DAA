@@ -1,0 +1,2 @@
+#1. RF_Depth10.py -> RandomFlorest com Max_depth de 10 
+#2. XGB - max_depth=1, objective='multi:softprob', num_class=5
