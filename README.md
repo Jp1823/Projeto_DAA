@@ -11,9 +11,9 @@ Como o MCI é o estado transacional entre o normal e a AD. E por tanto é necess
 
 Magnetic Resonance Imaging (MRI - Imagens do cérebro): Observar através do MRI as diferenças que estão associadas ao MCI como a diminuição do hipotálamo, o alargamento das regiões ocupadas por fluidos e o uso reduzido de glicose. 
 
-A radiómica é uma abordagem quantitativa à imagiologia médica que fornece informações texturais através da extração matemática da distribuição espacial das intensidades de sinal e das inter-relações entre pixels. Após a extração das caraterísticas radiómicas, são utilizados métodos de aprendizagem automática (ML) ou métodos estatísticos avançados para analisar as caraterísticas
+A radiómica é uma abordagem quantitativa à imagiologia médica que fornece informações texturais através da extração matemática da distribuição espacial das intensidades de sinal e das inter-relações entre pixels. Após a extração das caraterísticas radiómicas, são utilizados métodos de aprendizagem automática (ML) ou métodos estatísticos avançados para analisar as caraterísticas.
 
-volução da capacidade cognitiva ao longo do tempo. 
+Representa a Evolução da capacidade cognitiva ao longo do tempo. 
 Os exames de MRI continham **256 cortes**, ou seja, 256 "fatias" ou imagens bidimensionais que, quando empilhadas, formam uma imagem tridimensional do cérebro. Cada voxel (o equivalente tridimensional de um pixel) dessas imagens tinha uma resolução isotrópica de **1 mm³**, o que significa que cada voxel tem o mesmo tamanho em todas as direções, garantindo uma imagem tridimensional uniforme e precisa. Esses dados foram armazenados no formato **NIfTI** (*Neuroimaging Informatics Technology Initiative*), um formato comum utilizado para armazenar dados volumétricos de neuroimagem.
 
 É como ser fosse uma imagem 3D, em que cada voxel, representa camada do “bolo” de 1mm3
