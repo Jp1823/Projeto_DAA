@@ -43,36 +43,47 @@ X_train_split, X_test_split, y_train_split, y_test_split = train_test_split(X_tr
 
 # Definir o espaço de parâmetros para RandomizedSearchCV
 # declare parameters
-params = {
-            'max_depth': 4,
-            'alpha': 10,
-            'learning_rate': 1.0,
-            'n_estimators':100
-        }
-                 
-# instantiate the classifier 
-xgb_clf = XGBClassifier(**params)
+param_grid = {
+    'n_estimators': [50, 100, 200, 300],        # Number of boosting rounds
+    'max_depth': [3, 4, 5, 6],                 # Tree depth
+    'learning_rate': [0.01, 0.05, 0.1, 0.2],   # Learning rate
+    'min_child_weight': [1, 3, 5],             # Minimum child weight
+    'subsample': [0.6, 0.8, 1.0],              # Subsample ratio of training samples
+    'colsample_bytree': [0.6, 0.8, 1.0],       # Subsample ratio of columns
+    'gamma': [0, 0.1, 0.3, 0.5],               # Minimum loss reduction
+    'alpha': [0, 1, 10]                        # L1 regularization
+}
 
-# fit the classifier to the training data
-best_xgb_model= xgb_clf.fit(X_train, y_train)
+# Initialize the XGBoost Classifier
+xgb_clf = XGBClassifier(objective='multi:softmax', num_class=5, random_state=42)
 
-# Executar a busca com medição de tempo
-start_time = time.time()
-elapsed_time = time.time() - start_time
+# Setup RandomizedSearchCV, cross-validation and scoring
+random_search = RandomizedSearchCV(
+    estimator=xgb_clf, 
+    param_distributions=param_grid, 
+    n_iter=50,                 # Number of random combinations to try
+    scoring='accuracy',        # Use accuracy for scoring
+    cv=3,                      # 3-fold cross-validation
+    verbose=2,                 # Display progress
+    random_state=42,           # For reproducibility
+    n_jobs=-1                  # Use all available cores
+)
 
-# Exibir os melhores parâmetros e resultados
-print(f"Tempo para encontrar o melhor modelo: {elapsed_time:.2f} segundos")
-print("Melhores parâmetros encontrados:", xgb_clf.get_params())
+# Perform RandomizedSearchCV
+print("Running RandomizedSearchCV...")
+random_search.fit(X_train, y_train)
 
-# Usar o melhor modelo encontrado para fazer previsões
+# Display the best parameters
+print("Best parameters found: ", random_search.best_params_)
 
+# Get the best model
+best_xgb_model = random_search.best_estimator_
+
+# Make predictions on the validation set
 predictions = best_xgb_model.predict(X_test_split)
 
-# Calculate accuracy
-#accuracy = accuracy_score(y_test_split, predictions)
-#print(f"Accuracy: {accuracy}")
-
-# Exibir o classification report
+# Evaluate the model
+print("Classification Report:")
 print(classification_report(y_test_split, predictions, target_names=list(mapping.keys())))
 
 # Fazer previsões no conjunto de teste final com o melhor modelo
