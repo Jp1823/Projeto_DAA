@@ -1,0 +1,7 @@
+verificar as variáveis fornecidos pelo nuno
+
+Realizar feature importance 
+
+Colocar Redes Neuronais 
+
+O resto dos modelos estão bem , basta fazer análise dados
