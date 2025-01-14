@@ -72,19 +72,22 @@ models = {
 
 # Mapear cada classe para o melhor modelo baseado nas métricas
 class_model_mapping = {
-    0: 'xgb_R',
-    1: 'xgb_R',
-    2: 'xgb_R',
-    3: 'xgb_R',
-    4: 'xgb_G'
+    0: 'xgb_R',  # Escolha do melhor modelo para a classe 0
+    1: 'xgb_R',  # Escolha do melhor modelo para a classe 1
+    2: 'xgb_R',  # Escolha do melhor modelo para a classe 2
+    3: 'svm_rbf',  # Escolha do melhor modelo para a classe 3
+    4: 'svm_rbf'   # Escolha do melhor modelo para a classe 4
 }
 
-# Obter previsões e probabilidades de todos os modelos
+# Obter previsões e probabilidades de todos os modelos no conjunto de teste
 predictions = {}
 probabilities = {}
 for name, model in models.items():
-    predictions[name] = model.predict(X_test_split)
-    probabilities[name] = model.predict_proba(X_test_split)
+    try:
+        predictions[name] = model.predict(X_test_split)
+        probabilities[name] = model.predict_proba(X_test_split)
+    except Exception as e:
+        print(f"Erro ao gerar previsões para o modelo {name}: {e}")
 
 # Lista para armazenar as previsões finais
 final_predictions = []
@@ -93,7 +96,7 @@ final_predictions = []
 for i in range(len(X_test_split)):
     class_probs = {}
     for class_label, model_name in class_model_mapping.items():
-        prob = probabilities[model_name][i][class_label]
+        prob = probabilities.get(model_name, [[0] * len(class_model_mapping)])[i][class_label]
         class_probs[class_label] = prob
     best_class = max(class_probs.items(), key=lambda x: x[1])[0]
     final_predictions.append(best_class)
@@ -106,12 +109,18 @@ print("Accuracy do Smart Ensemble:", accuracy_score(y_test_split, final_predicti
 
 # Fazer previsões no conjunto de teste final
 X_test_final = hipp_test_c.drop(columns=['ID'], errors='ignore')
-test_probabilities = {name: model.predict_proba(X_test_final) for name, model in models.items()}
+test_probabilities = {}
+for name, model in models.items():
+    try:
+        test_probabilities[name] = model.predict_proba(X_test_final)
+    except Exception as e:
+        print(f"Erro ao gerar probabilidades para o modelo {name} no conjunto final: {e}")
+
 final_test_predictions = []
 for i in range(len(X_test_final)):
     class_probs = {}
     for class_label, model_name in class_model_mapping.items():
-        prob = test_probabilities[model_name][i][class_label]
+        prob = test_probabilities.get(model_name, [[0] * len(class_model_mapping)])[i][class_label]
         class_probs[class_label] = prob
     best_class = max(class_probs.items(), key=lambda x: x[1])[0]
     final_test_predictions.append(best_class)
