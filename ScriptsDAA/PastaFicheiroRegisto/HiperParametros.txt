@@ -4,5 +4,7 @@
 #4. XGBRandSearch.py - Melhores parâmetros encontrados: {'tree_method': 'hist', 'subsample': 0.6, 'scale_pos_weight': 1, 'reg_lambda': 10, 'reg_alpha': 0.1, 'n_estimators': 50, 'min_child_weight': 3, 'max_depth': 7, 'learning_rate': 0.1, 'gamma': 0.1, 'colsample_bytree': 0.6}
 #5. XGBBayesianaeLGBM 
 #6. XGBbooster - Melhores parâmetros encontrados: {'booster': 'gbtree', 'colsample_bytree': 0.6, 'gamma': 0.1, 'learning_rate': 0.2, 'max_delta_step': 1, 'max_depth': 3, 'min_child_weight': 3, 'n_estimators': 97, 'reg_alpha': 0.01, 'reg_lambda': 10, 'subsample': 0.6}. Resultado: 0.39111
-#7. XGBbooster - Bin Age - Melhores parâmetros: {'booster': 'dart', 'colsample_bytree': 0.6, 'gamma': 0.1, 'learning_rate': 0.2, 'max_delta_step': 1, 'max_depth': 3, 'min_child_weight': 3, 'n_estimators': 97, 'reg_alpha': 0.1, 'reg_lambda': 100, 'subsample': 0.6}
-#8. XGb_gbtree - Melhores Parametros encontrados:  {'subsample': 0.8, 'reg_lambda': 1.0, 'reg_alpha': 1.0, 'n_estimators': 50, 'min_child_weight': 5, 'max_depth': 5, 'max_delta_step': 1, 'learning_rate': 0.01, 'gamma': 0.5, 'colsample_bytree': 0.8, 'booster': 'gbtree'}: Resultado public: 0.32337
+#7. XGBNewFeature - Bin Age - Melhores parâmetros: {'booster': 'dart', 'colsample_bytree': 0.6, 'gamma': 0.1, 'learning_rate': 0.2, 'max_delta_step': 1, 'max_depth': 3, 'min_child_weight': 3, 'n_estimators': 97, 'reg_alpha': 0.1, 'reg_lambda': 100, 'subsample': 0.6} Resultado: 0.39297
+#8. Essemble - Tudo de Feature Engineering + Exploração de dados - XGB #7 + SVM + XGB #7 com o booster:{gblinear} com GridSearch + RF otimizada com gridSearch Resultado: 0.40522
+#9. EssembleMelhorResultadoCrossValidation - Igual ao Essemble melhor resultado, porém com cross validation: 0.40522
+#10 SVM - Tudo igual de preparação de dados: SVC(C=50, kernel='rbf', probability=True): 0.4111
