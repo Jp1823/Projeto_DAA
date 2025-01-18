@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.ensemble import VotingClassifier, RandomForestClassifier
@@ -6,8 +7,8 @@ from sklearn.metrics import accuracy_score, classification_report
 from xgboost import XGBClassifier
 
 # Carregar datasets
-hipp_train = pd.read_csv('/mnt/c/Users/João/Documents/DAA/Projeto/train_radiomics_hipocamp.csv', na_filter=False)
-hipp_test = pd.read_csv('/mnt/c/Users/João/Documents/DAA/Projeto/test_radiomics_hipocamp.csv', na_filter=False)
+hipp_train = pd.read_csv('train_radiomics_hipocamp.csv', na_filter=False)
+hipp_test = pd.read_csv('test_radiomics_hipocamp.csv', na_filter=False)
 
 # Remover colunas com apenas um valor e colunas irrelevantes
 colunas_remover = ['Image', 'diagnostics_Image-original_Hash', 'diagnostics_Mask-original_Hash',
@@ -111,13 +112,13 @@ rf_model = RandomForestClassifier(
 rf_model.fit(X_train_split, y_train_split)
 
 # Fazer previsões para cada modelo
-svm_rbf_preds = best_svm_rbf.predict(X_test_split)
+svm_rbf_preds = svm_model.predict(X_test_split)
 xgb_g_preds = best_xgb_model.predict(X_test_split)
 xgb_r_preds = xgb_model.predict(X_test_split)
 rf_preds = rf_model.predict(X_test_split)
 
 # Exibir previsões
-svm_rbf_preds = best_svm_rbf.predict(X_test_split)
+svm_rbf_preds = svm_model.predict(X_test_split)
 xgb_g_preds = best_xgb_model.predict(X_test_split)
 xgb_r_preds = xgb_model.predict(X_test_split)
 rf_preds = rf_model.predict(X_test_split)
@@ -142,7 +143,7 @@ print("Accuracy do modelo Random Forest:", accuracy_score(y_test_split, rf_preds
 # Definir os modelos ajustados
 ensemble_model = VotingClassifier(
     estimators=[
-        ('svm_rbf', best_svm_rbf),
+        ('svm_rbf', svm_model),
         ('xgb_G', best_xgb_model),
         ('xgb_R', xgb_model),
         ('rf', rf_model)
