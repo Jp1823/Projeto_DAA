@@ -1,10 +1,14 @@
+import itertools
+from matplotlib import pyplot as plt
 import numpy as np
 import pandas as pd
-from sklearn.metrics import accuracy_score, classification_report
+from sklearn import metrics
+from sklearn.metrics import ConfusionMatrixDisplay, accuracy_score, classification_report, confusion_matrix, mean_absolute_error, mean_squared_error, pair_confusion_matrix
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.svm import SVC
 from xgboost import XGBClassifier
+import seaborn as sns
 
 # Carregar datasets
 hipp_train = pd.read_csv('train_radiomics_hipocamp.csv', na_filter=False)
@@ -133,3 +137,112 @@ submission_df = pd.DataFrame({
 })
 submission_df.to_csv('Smart-Ensemble-Sequential.csv', index=False)
 print("\nSubmissão salva com sucesso com", len(submission_df), "previsões.")
+
+
+def evaluate_model(model, X_test, y_test, model_name):
+    predictions = model.predict(X_test)
+    accuracy = accuracy_score(y_test, predictions)
+    mae = mean_absolute_error(y_test, predictions)
+    mse = mean_squared_error(y_test, predictions)
+    rmse = np.sqrt(mse)
+
+    print(f"Results for {model_name}:")
+    print(f"Accuracy: {accuracy:.4f}, MAE: {mae:.4f}, MSE: {mse:.4f}, RMSE: {rmse:.4f}")
+    print(classification_report(y_test, predictions, zero_division=1))
+    
+    return predictions
+
+# Evaluate each model
+for name, model in models.items():
+    print(f"Evaluating {name}...")
+    evaluate_model(model, X_test_split, y_test_split, name)
+    
+    
+# Ensemble Evaluation (already implemented in your code)
+print("Evaluating Smart Ensemble...")
+print("Relatório de Classificação do Smart Ensemble:")
+print(classification_report(y_test_split, final_predictions, target_names=list(mapping.keys())))
+print("Accuracy do Smart Ensemble:", accuracy_score(y_test_split, final_predictions))
+
+def plot_last_100_matrices(models, X_test_final, final_predictions, mapping, n_last=100):
+    # Get the last n predictions
+    last_n = min(n_last, len(final_predictions))  # In case we have fewer than 100 predictions
+    last_predictions = final_predictions[-last_n:]
+    last_X = X_test_final.iloc[-last_n:]
+    
+    # Create a figure with subplots
+    fig, axes = plt.subplots(2, 3, figsize=(24, 16))
+    plt.subplots_adjust(wspace=0.4, hspace=0.4)
+    axes = axes.ravel()
+    
+    # Create list of labels
+    labels = list(mapping.keys())
+    
+    # Get predictions from each model for the last n samples
+    for idx, (name, model) in enumerate(models.items()):
+        model_predictions = model.predict(last_X)
+        
+        # Create confusion matrix between this model and fusion
+        cm = confusion_matrix(last_predictions, model_predictions)
+        
+        # Plot manually to avoid tick issues
+        im = axes[idx].imshow(cm, interpolation='nearest', cmap=plt.cm.YlOrRd)
+        
+        # Add colorbar
+        fig.colorbar(im, ax=axes[idx])
+        
+        # Set title and labels
+        axes[idx].set_title(f'Confusion Matrix - {name.upper()}\nvs Fusion Model', pad=20, fontsize=12)
+        axes[idx].set_xlabel('Model Prediction', fontsize=10)
+        axes[idx].set_ylabel('Fusion Model Prediction', fontsize=10)
+        
+        # Set ticks and labels
+        tick_marks = np.arange(len(labels))
+        axes[idx].set_xticks(tick_marks)
+        axes[idx].set_yticks(tick_marks)
+        axes[idx].set_xticklabels(labels, rotation=45, ha='right')
+        axes[idx].set_yticklabels(labels)
+        
+        # Add text annotations in the cells
+        thresh = cm.max() / 2.
+        for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
+            axes[idx].text(j, i, format(cm[i, j], 'd'),
+                         ha="center", va="center",
+                         color="white" if cm[i, j] > thresh else "black")
+        
+        # Add agreement percentage
+        agreement = np.mean(last_predictions == model_predictions) * 100
+        axes[idx].text(0.05, -0.15, f'Agreement with fusion: {agreement:.1f}%', 
+                      transform=axes[idx].transAxes, fontsize=10)
+    
+    # Create distribution plot for fusion model predictions
+    fusion_predictions = pd.Series(last_predictions).map({v: k for k, v in mapping.items()})
+    sns.countplot(x=fusion_predictions, ax=axes[-2])
+    axes[-2].set_title(f'Distribution of Fusion Model Predictions\n(Last {last_n} samples)', pad=20, fontsize=12)
+    axes[-2].set_xticklabels(axes[-2].get_xticklabels(), rotation=45, ha='right', fontsize=10)
+    
+    # Remove the last subplot
+    fig.delaxes(axes[-1])
+    
+    plt.suptitle(f'Model Comparisons for Last {last_n} Predictions', fontsize=14, y=1.02)
+    plt.tight_layout()
+    plt.show()
+    
+    # Print detailed analysis
+    print(f"\nDistribution of Last {last_n} Predictions (Fusion Model):")
+    print("-" * 50)
+    value_counts = fusion_predictions.value_counts()
+    for class_name, count in value_counts.items():
+        percentage = (count / last_n) * 100
+        print(f"{class_name}: {count} predictions ({percentage:.1f}%)")
+    
+    # Print agreement percentages
+    print("\nModel Agreement with Fusion Model:")
+    print("-" * 50)
+    for name, model in models.items():
+        model_predictions = model.predict(last_X)
+        agreement = np.mean(last_predictions == model_predictions) * 100
+        print(f"{name}: {agreement:.1f}% agreement")
+
+# Call the function
+plot_last_100_matrices(models, X_test_final, final_test_predictions, mapping)

@@ -8,9 +8,9 @@ from xgboost import XGBClassifier
 from sklearn.model_selection import cross_val_score
 
 # Carregar datasets
-hipp_train = pd.read_csv('/mnt/c/Users/João/Documents/DAA/Projeto/train_radiomics_hipocamp.csv', na_filter=False)
-hipp_test = pd.read_csv('/mnt/c/Users/João/Documents/DAA/Projeto/test_radiomics_hipocamp.csv', na_filter=False)
-hipp_control = pd.read_csv('/mnt/c/Users/João/Documents/DAA/Projeto/train_radiomics_occipital_CONTROL.csv', na_filter=False)
+hipp_train = pd.read_csv('train_radiomics_hipocamp.csv', na_filter=False)
+hipp_test = pd.read_csv('test_radiomics_hipocamp.csv', na_filter=False)
+hipp_control = pd.read_csv('train_radiomics_occipital_CONTROL.csv', na_filter=False)
 
 # Remover colunas com apenas um valor e colunas irrelevantes
 colunas_remover = ['Image', 'diagnostics_Image-original_Hash', 'diagnostics_Mask-original_Hash',
