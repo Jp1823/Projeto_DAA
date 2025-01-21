@@ -5,10 +5,12 @@ from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.svm import SVC
 from xgboost import XGBClassifier
+from sklearn.model_selection import GridSearchCV
 
 # Carregar datasets
 hipp_train = pd.read_csv('/mnt/c/Users/João/Documents/DAA/Projeto/train_radiomics_hipocamp.csv', na_filter=False)
 hipp_test = pd.read_csv('/mnt/c/Users/João/Documents/DAA/Projeto/test_radiomics_hipocamp.csv', na_filter=False)
+hipp_control = pd.read_csv('/mnt/c/Users/João/Documents/DAA/Projeto/train_radiomics_occipital_CONTROL.csv', na_filter=False)
 
 # Remover colunas com apenas um valor e colunas irrelevantes
 colunas_remover = ['Image', 'diagnostics_Image-original_Hash', 'diagnostics_Mask-original_Hash',
@@ -49,22 +51,54 @@ X_train = hipp_train_c.drop(['Transition', 'ID'], axis=1)
 y_train = hipp_train_c['Transition']
 
 # Dividir o conjunto de treinamento em treino e teste
-X_train_split, X_test_split, y_train_split, y_test_split = train_test_split(X_train, y_train, test_size=0.2, random_state=2022)
+X_train_split, X_test_split, y_train_split, y_test_split = train_test_split(
+    X_train, y_train, test_size=0.2, random_state=21, stratify=y_train
+)
 
-# Configurando os modelos com os melhores parâmetros
-best_svm_rbf = SVC(C=50, kernel='rbf', probability=True).fit(X_train_split, y_train_split)
+# Ver distribuição de classes
+train_distribution = y_train.value_counts(normalize=True)
+test_distribution = y_test_split.value_counts(normalize=True)
+print("Distribuição de Classes no Treino:\n", train_distribution)
+print("Distribuição de Classes no Teste:\n", test_distribution)
+
+# SVM (sem validação cruzada)
+svm_rbf = SVC(C=35, kernel='rbf', probability=True, random_state=21)
+svm_rbf.fit(X_train_split, y_train_split)
+svm_pred = svm_rbf.predict(X_test_split)
+
+# Exibir o relatório de classificação do SVM
+print("\nSVM Classification Report:")
+print(classification_report(y_test_split, svm_pred))
+
+# XGBoost (booster='gblinear') sem validação cruzada
 best_xgb_model = XGBClassifier(booster='gblinear', colsample_bytree=0.6, gamma=0.1, learning_rate=0.2,
                                 max_delta_step=1, max_depth=3, min_child_weight=3, n_estimators=97,
-                                reg_alpha=0.01, reg_lambda=10, subsample=0.6, random_state=2022).fit(X_train_split, y_train_split)
+                                reg_alpha=0.01, reg_lambda=10, subsample=0.6, random_state=21)
+best_xgb_model.fit(X_train_split, y_train_split)
+xgb_linear_pred = best_xgb_model.predict(X_test_split)
+print("\nXGBoost (gblinear) Classification Report:")
+print(classification_report(y_test_split, xgb_linear_pred))
+
+# XGBoost (dart) sem validação cruzada
 xgb_model = XGBClassifier(booster='dart', colsample_bytree=0.6, gamma=0.1, learning_rate=0.2,
                           max_delta_step=1, max_depth=3, min_child_weight=5, n_estimators=97,
-                          reg_alpha=0.01, reg_lambda=10, subsample=0.6, eval_metric='mlogloss').fit(X_train_split, y_train_split)
+                          reg_alpha=0.01, reg_lambda=10, subsample=0.6,random_state=21, eval_metric='mlogloss')
+xgb_model.fit(X_train_split, y_train_split)
+xgb_dart_pred = xgb_model.predict(X_test_split)
+print("\nXGBoost (dart) Classification Report:")
+print(classification_report(y_test_split, xgb_dart_pred))
+
+# RandomForest sem validação cruzada
 rf_model = RandomForestClassifier(n_estimators=75, max_depth=None, min_samples_split=10,
-                                   min_samples_leaf=4, random_state=2022).fit(X_train_split, y_train_split)
+                                   min_samples_leaf=4, random_state=21, class_weight='balanced')
+rf_model.fit(X_train_split, y_train_split)
+rf_pred = rf_model.predict(X_test_split)
+print("\nRandom Forest Classification Report:")
+print(classification_report(y_test_split, rf_pred))
 
 # Criar dicionário com todos os modelos já treinados
 models = {
-    'svm_rbf': best_svm_rbf,
+    'svm_rbf': svm_rbf,
     'xgb_G': best_xgb_model,
     'xgb_R': xgb_model,
     'rf': rf_model
@@ -72,8 +106,8 @@ models = {
 
 # Mapear cada classe para o melhor modelo baseado nas métricas
 class_model_mapping = {
-    0: 'xgb_R',  # Escolha do melhor modelo para a classe 0
-    1: 'xgb_R',  # Escolha do melhor modelo para a classe 1
+    0: 'svm_rbf',  # Escolha do melhor modelo para a classe 0
+    1: 'xgb_G',  # Escolha do melhor modelo para a classe 1
     2: 'xgb_R',  # Escolha do melhor modelo para a classe 2
     3: 'svm_rbf',  # Escolha do melhor modelo para a classe 3
     4: 'svm_rbf'   # Escolha do melhor modelo para a classe 4
@@ -96,7 +130,10 @@ final_predictions = []
 for i in range(len(X_test_split)):
     class_probs = {}
     for class_label, model_name in class_model_mapping.items():
-        prob = probabilities.get(model_name, [[0] * len(class_model_mapping)])[i][class_label]
+        if model_name in probabilities and len(probabilities[model_name]) > i:
+            prob = probabilities[model_name][i][class_label]
+        else:
+            prob = 0  # ou outro valor padrão
         class_probs[class_label] = prob
     best_class = max(class_probs.items(), key=lambda x: x[1])[0]
     final_predictions.append(best_class)
@@ -120,7 +157,10 @@ final_test_predictions = []
 for i in range(len(X_test_final)):
     class_probs = {}
     for class_label, model_name in class_model_mapping.items():
-        prob = test_probabilities.get(model_name, [[0] * len(class_model_mapping)])[i][class_label]
+        if model_name in test_probabilities and len(test_probabilities[model_name]) > i:
+            prob = test_probabilities[model_name][i][class_label]
+        else:
+            prob = 0  # ou outro valor padrão
         class_probs[class_label] = prob
     best_class = max(class_probs.items(), key=lambda x: x[1])[0]
     final_test_predictions.append(best_class)
@@ -131,5 +171,5 @@ submission_df = pd.DataFrame({
     'RowId': range(1, len(predictions_mapped) + 1),
     'Result': predictions_mapped
 })
-submission_df.to_csv('Smart-Ensemble-Sequential.csv', index=False)
-print("\nSubmissão salva com sucesso com", len(submission_df), "previsões.")
+submission_df.to_csv('TesteEssembleFinal.csv', index=False)
+print("\nSubmissão salva como TesteEssembleFinal.csv")
