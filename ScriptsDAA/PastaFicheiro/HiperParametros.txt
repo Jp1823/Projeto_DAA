@@ -1,2 +1,0 @@
-#1. RF_Depth10.py -> RandomFlorest com Max_depth de 10 
-#2. LogisticRegression
