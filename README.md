@@ -1,23 +1,37 @@
 ## Projeto_DAA
 
-# Resumo do Projeto
-Notas: Perda no poder cognitivo e a demência estão a subir com frequência no mundo inteiro. Existe uma série de genética, lifestyle e condições de saúde. 
+### Project Summary
 
-Mild Cognitive Impairment(MCI) : É uma condição caracterizada por um declínio cognitivo maior para as pessoas das mesma faixa etária para um indivíduo da mesma baixa etária e grau académico, que não interfere com as atividades diárias. 
+This report is part of the practical work for the course on Data and Machine Learning, aimed at deepening the knowledge acquired throughout the semester.
 
-Apesar de não ser tão agressivo como o MCI, pode progredir para demência, em particular o Alzheimer (AD) . 
+The project is framed within a Kaggle challenge that seeks to analyze correlations in MRI images depending on the patient's development stage (Cognitively Normal - CN, Mild Cognitive Impairment - MCI, and Alzheimer's Disease - AD). Through a structured methodology, the provided dataset will be analyzed, explored, and preprocessed to extract relevant information about the problem.
 
-Como o MCI é o estado transacional entre o normal e a AD. E por tanto é necessário prever para prever o potencial tratamento para reduzir o número de pessoas com demência no longo termo. 
+This process enables the design and optimization of multiple Machine Learning models. The ultimate goal of this project is to develop a balanced model that leverages identified correlations and is capable of accurately predicting the stage of Alzheimer's disease progression in a patient.
 
-Magnetic Resonance Imaging (MRI - Imagens do cérebro): Observar através do MRI as diferenças que estão associadas ao MCI como a diminuição do hipotálamo, o alargamento das regiões ocupadas por fluidos e o uso reduzido de glicose. 
+---
 
-A radiómica é uma abordagem quantitativa à imagiologia médica que fornece informações texturais através da extração matemática da distribuição espacial das intensidades de sinal e das inter-relações entre pixels. Após a extração das caraterísticas radiómicas, são utilizados métodos de aprendizagem automática (ML) ou métodos estatísticos avançados para analisar as caraterísticas.
+Cognitive decline and dementia are increasingly prevalent worldwide, driven by a combination of genetic, lifestyle, and health-related factors.
 
-Representa a Evolução da capacidade cognitiva ao longo do tempo. 
-Os exames de MRI continham **256 cortes**, ou seja, 256 "fatias" ou imagens bidimensionais que, quando empilhadas, formam uma imagem tridimensional do cérebro. Cada voxel (o equivalente tridimensional de um pixel) dessas imagens tinha uma resolução isotrópica de **1 mm³**, o que significa que cada voxel tem o mesmo tamanho em todas as direções, garantindo uma imagem tridimensional uniforme e precisa. Esses dados foram armazenados no formato **NIfTI** (*Neuroimaging Informatics Technology Initiative*), um formato comum utilizado para armazenar dados volumétricos de neuroimagem.
+#### Mild Cognitive Impairment (MCI)
 
-É como ser fosse uma imagem 3D, em que cada voxel, representa camada do “bolo” de 1mm3
-CD - Significa Condição normal. 
+Mild Cognitive Impairment (MCI) is a condition characterized by greater cognitive decline than expected for an individual's age and educational background, without significantly affecting daily activities.
 
-## Como guardar modelos de previsão? 
-Na Pasta Ficheiro, tem um ficheiro de texto, que serve para fazer um género de hash map, onde um certo conjunto de hiperaparametros/métodos de implementação estão associados a um ID. O Script com esses hiperparâmetros/métodos de implementação será colocado em baixo, com o respetivo IP. 
+Although MCI is less severe than dementia, it can progress to more serious conditions, particularly Alzheimer's Disease (AD). Because MCI represents a transitional state between normal aging and AD, early detection is essential to enable timely treatment and potentially reduce the number of dementia cases in the long term.
+
+### MRI Imaging and Radiomics
+
+Magnetic Resonance Imaging (MRI) allows the observation of structural brain changes associated with MCI, including:
+
+- Shrinkage of the hippocampus
+- Enlargement of fluid-filled brain regions
+- Reduced glucose metabolism
+
+Radiomics is a quantitative approach to medical imaging that extracts textural features from the spatial distribution and relationships of pixel or voxel intensities in the image. Once these radiomic features are extracted, they are analyzed using machine learning (ML) or advanced statistical methods to identify patterns related to cognitive decline.
+
+### MRI Data Characteristics
+
+- Each MRI scan includes 256 slices (2D images) that together form a 3D image of the brain.
+- Each voxel (3D equivalent of a pixel) has an isotropic resolution of 1 mm³, meaning all sides of the voxel measure 1 mm, ensuring uniform spatial accuracy.
+- The data is stored in the NIfTI format (Neuroimaging Informatics Technology Initiative), which is commonly used for volumetric neuroimaging data.
+
+You can think of the MRI volume as a 3D image composed of stacked layers, where each voxel represents a 1 mm³ block of brain tissue.
